@@ -2,8 +2,8 @@
 [![GitHub Stars](https://img.shields.io/github/stars/ChromizedClient/Chromized.svg?style=social&label=Star&maxAge=2592000)](https://github.com/ChromizedClient/Chromized/stargazers)
 [![GitHub Watches](https://img.shields.io/github/watchers/ChromizedClient/Chromized.svg?style=social&label=Watch&maxAge=2592000)](https://github.com/ChromizedClient/Chromized/watchers)
 
-# Chromized Assets #
-## What is Chromized? ##
+# Chromized Client #
+## What is Chromized Client? ##
 Chromized Client is a Minecraft 1.8.9 client, currently in its development stage. It will combine many popular features, in addition to suggestions and ideas from the community, in order to provide a unique experience designed for the Hypixel Server.
 
 ## Developers ##
