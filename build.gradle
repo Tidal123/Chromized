@@ -1,0 +1,122 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+        maven {
+            name = "forge"
+            url = "http://files.minecraftforge.net/maven"
+        }
+        maven {
+            name = 'sponge'
+            url = 'https://repo.spongepowered.org/maven'
+        }
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+        maven {
+            url 'https://jitpack.io'
+        }
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.1-SNAPSHOT'
+        classpath 'org.spongepowered:mixingradle:0.6-SNAPSHOT'
+    }
+}
+
+configurations {
+    embed
+    compile.extendsFrom(embed)
+}
+
+apply plugin: 'net.minecraftforge.gradle.tweaker-client'
+apply plugin: 'org.spongepowered.mixin'
+apply plugin: 'java'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+compileJava.options.encoding = 'UTF-8'
+
+version = "1.0"
+group = "cc.chromized"
+archivesBaseName = "Chromized"
+
+minecraft {
+    version = "1.8.9"
+    tweakClass = "chromized.launch.ChromizedTweaker"
+    mappings = "stable_20"
+    runDir = 'run'
+    clientJvmArgs = ["-XX:-DisableExplicitGC"] // fast world loading
+    makeObfSourceJar = false
+}
+
+dependencies {
+    embed('org.spongepowered:mixin:0.7.7-SNAPSHOT') {
+        exclude module: 'launchwrapper'
+        exclude module: 'guava'
+        exclude module: 'gson'
+        exclude module: 'commons-io'
+    }
+
+    embed group: 'com.google.guava', name: 'guava', version: '17.0'
+    embed group: 'com.google.code.gson', name: 'gson', version: '2.8.2'
+
+    embed group: 'org.slick2d', name: 'slick2d-core', version: '1.0.2'
+    embed group: 'com.nativelibs4java', name: 'bridj', version: '0.7.0'
+
+    embed "com.github.KevinPriv:MojangAPI:1.0"
+    embed 'com.github.Cubxity:DeobfStack:1.2'
+
+    embed fileTree(dir: 'libs', include: 'Netty Client.jar')
+    compile fileTree(dir: 'libs', include: '*.jar')
+}
+
+mixin {
+    defaultObfuscationEnv notch
+    add sourceSets.main, "mixin.chromized.refmap.json"
+}
+
+repositories {
+    maven { url "https://jitpack.io" }
+    maven {
+        name = 'sponge'
+        url = 'https://repo.spongepowered.org/maven/'
+    }
+    mavenCentral()
+    jcenter()
+}
+
+processResources {
+    inputs.files "src/main/resources"
+    outputs.dir "build/classes/main"
+    copy {
+        from("src/main/resources")
+        into("build/classes/main")
+    }
+}
+
+
+jar {
+    dependsOn configurations.compile
+    from {
+        configurations.embed.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+    exclude 'META-INF/*.RSA', 'META-INF/*.SF', 'META-INF/*.DSA'
+}
+
+jar {
+    manifest.attributes(
+            "MixinConfigs": 'mixins.chromized.json',
+            "TweakClass": 'chromized.launch.ChromizedTweaker',
+            "TweakOrder": 0,
+            "Manifest-Version": 1.0,
+            'Main-Class': 'chromized.installer.InstallerStart'
+    )
+    configurations.embed.each { dep ->
+        from(project.zipTree(dep)) {
+            exclude 'META-INF', 'META-INF/**'
+            exclude 'org/jetbrains/annotations', 'org/jetbrains/annotations/**'
+        }
+    }
+}
